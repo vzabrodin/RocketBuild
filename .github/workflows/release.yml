@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.3
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Build & publish
+      run: |
+        dotnet nuget locals all --clear
+        dotnet publish RocketBuild/ -o RocketBuild/bin/Release/publish --configuration Release
+    - name: Pack
+      run: Compress-Archive -Path RocketBuild/bin/Release/publish/* -DestinationPath RocketBuild/bin/Release/publish/archive.zip -Force
+      shell: pwsh
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: RocketBuild/bin/Release/publish/archive.zip
+        asset_name: RocketBuild.zip
+        asset_content_type: application/zip
