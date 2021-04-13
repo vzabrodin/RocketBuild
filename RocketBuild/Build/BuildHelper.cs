@@ -39,6 +39,7 @@ namespace RocketBuild.Build
                 builds.Add(new DisplayBuild
                 {
                     DefinitionId = definition.Id,
+                    Path = definition.Path.TrimStart('\\'),
                     Name = definition.Name,
                     LastBuild = lastTfsBuild != null ? Regex.Match(lastTfsBuild.BuildNumber, Settings.GlobalSettings.Current.BuildNameExtractVersionRegex).Value : String.Empty,
                     LastBuildStatus = (DisplayBuildStatus?)lastTfsBuild?.Status,

@@ -15,6 +15,22 @@
         Title="RocketBuild"
         DataContext="{Binding Path=ViewModel, RelativeSource={RelativeSource Self}, Mode=OneWay}"
         Closing="OnClosing">
+    <Window.Resources>
+        <Style x:Key="GroupHeaderStyle" TargetType="{x:Type GroupItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                        <Expander x:Name="exp" IsExpanded="True">
+                            <Expander.Header>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="12" />
+                            </Expander.Header>
+                            <ItemsPresenter />
+                        </Expander>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid>
             <dragablz:TabablzControl FixedHeaderCount="3">
@@ -26,11 +42,20 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <DataGrid Grid.Row="0" ItemsSource="{Binding Builds}"
-					              AutoGenerateColumns="False" CanUserAddRows="False"
-					              CanUserDeleteRows="False" CanUserResizeRows="False"
-					              SelectionUnit="FullRow"
+                        <DataGrid Grid.Row="0" ItemsSource="{Binding BuildsView}"
+                                  AutoGenerateColumns="False" CanUserAddRows="False"
+                                  CanUserDeleteRows="False" CanUserResizeRows="False"
+                                  SelectionUnit="FullRow"
                                   md:DataGridAssist.CellPadding="13 8 8 8">
+                            <DataGrid.GroupStyle>
+                                <GroupStyle ContainerStyle="{StaticResource GroupHeaderStyle}">
+                                    <GroupStyle.Panel>
+                                        <ItemsPanelTemplate>
+                                            <DataGridRowsPresenter/>
+                                        </ItemsPanelTemplate>
+                                    </GroupStyle.Panel>
+                                </GroupStyle>
+                            </DataGrid.GroupStyle>
                             <DataGrid.Columns>
                                 <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
                                                         ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"

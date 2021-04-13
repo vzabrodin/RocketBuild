@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Forms;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.DataAnnotations;
 using RocketBuild.Build;
 using RocketBuild.Deploy;
 using RocketBuild.Extensions;
+using LinqExtensions = DevExpress.Mvvm.Native.LinqExtensions;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace RocketBuild
@@ -17,8 +20,8 @@ namespace RocketBuild
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly DeployHelper deployHelper = new DeployHelper();
-        private readonly BuildHelper buildHelper = new BuildHelper();
+        private readonly DeployHelper _deployHelper = new DeployHelper();
+        private readonly BuildHelper _buildHelper = new BuildHelper();
 
         public MainViewModel()
         {
@@ -33,12 +36,18 @@ namespace RocketBuild
             set => SetProperty(() => IsBusy, value);
         }
 
-        public List<DisplayBuild> Builds
+        public ObservableCollection<DisplayBuild> Builds
         {
             get => GetProperty(() => Builds);
             set => SetProperty(() => Builds, value);
         }
 
+        public ListCollectionView BuildsView
+        {
+            get => GetProperty(() => BuildsView);
+            set => SetProperty(() => BuildsView, value);
+        }
+        
         public List<DisplayEnvironment> Environments
         {
             get => GetProperty(() => Environments);
@@ -94,14 +103,18 @@ namespace RocketBuild
             {
                 IsBusy = true;
 
-                int[] backupSelectedBuildIds = Builds
-                    ?.Where(b => b.IsChecked)
+                int[] backupSelectedBuildIds = Builds?
+                    .Where(b => b.IsChecked)
                     .Select(b => b.DefinitionId)
                     .ToArray();
 
-                Builds = (await buildHelper.GetBuildsAsync())
-                    .OrderBy(b => b.Name)
-                    .ToList();
+                Builds = LinqExtensions.ToObservableCollection(
+                    (await _buildHelper.GetBuildsAsync())
+                    .OrderBy(b => b.Name));
+
+                var collectionView = new ListCollectionView(Builds);
+                collectionView.GroupDescriptions?.Add(new PropertyGroupDescription(nameof(DisplayBuild.Path)));
+                BuildsView = collectionView;
 
                 if (backupSelectedBuildIds != null && Builds != null)
                 {
@@ -135,7 +148,7 @@ namespace RocketBuild
                     .Select(r => r.Id)
                     .ToArray();
 
-                Environments = (await deployHelper.GetEnvironmentsAsync())
+                Environments = (await _deployHelper.GetEnvironmentsAsync())
                     .OrderBy(e => e.Name)
                     .ToList();
 
@@ -176,8 +189,8 @@ namespace RocketBuild
                     .ToArray();
 
                 if (MessageBox.Show(
-                        $"Do you want to queue builds:\n\n{String.Join("\n", buildsToQueue.Select(b => b.Name))}",
-                        "Confirm build", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                        $@"Do you want to queue builds:{String.Join("\n", buildsToQueue.Select(b => b.Name))}",
+                        @"Confirm build", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2)
                     != DialogResult.Yes)
                     return;
@@ -186,7 +199,7 @@ namespace RocketBuild
 
                 foreach (DisplayBuild build in buildsToQueue)
                 {
-                    await buildHelper.StartBuildAsync(build);
+                    await _buildHelper.StartBuildAsync(build);
                 }
             }
             catch (Exception e)
@@ -211,8 +224,8 @@ namespace RocketBuild
                     .ToArray();
 
                 if (MessageBox.Show(
-                        $"Do you want to deploy releases:\n\n{String.Join("\n", releasesToQueue.Select(b => b.Name))}",
-                        "Confirm deploy", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                        $@"Do you want to deploy releases:{String.Join("\n", releasesToQueue.Select(b => b.Name))}",
+                        @"Confirm deploy", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2)
                     != DialogResult.Yes)
                     return;
@@ -221,7 +234,7 @@ namespace RocketBuild
 
                 foreach (DisplayRelease release in releasesToQueue)
                 {
-                    await deployHelper.StartDeploymentAsync(release);
+                    await _deployHelper.StartDeploymentAsync(release);
                 }
             }
             catch (Exception e)
@@ -267,13 +280,13 @@ namespace RocketBuild
             {
                 foreach (DisplayEnvironment environment in Environments)
                 {
-                    int[] lastSelectedReleases = Settings.GlobalSettings.Current.LastSelectedReleaseIds
-                        .GetValueOrDefault(environment.Name)
+                    int[] lastSelectedReleases = Settings.GlobalSettings.Current.LastSelectedReleaseIds?
+                        .GetValueOrDefault(environment.Name)?
                         .ToArray();
 
                     foreach (DisplayRelease release in environment.Releases)
                     {
-                        release.IsChecked = lastSelectedReleases.Contains(release.Id);
+                        release.IsChecked = lastSelectedReleases?.Contains(release.Id) ?? false;
                     }
                 }
             }

@@ -10,6 +10,8 @@ namespace RocketBuild.Build
             set => SetProperty(() => IsChecked, value);
         }
 
+        public string Path { get; set; }
+
         public int DefinitionId { get; set; }
 
         public string Name { get; set; }

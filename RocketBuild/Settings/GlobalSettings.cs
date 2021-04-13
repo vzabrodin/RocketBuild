@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace RocketBuild.Settings
@@ -9,9 +10,7 @@ namespace RocketBuild.Settings
     {
         private const string FileName = "Global.json";
 
-        private static readonly string DirectoryPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "RocketBuild");
+        private static readonly string DirectoryPath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
 
         private static string FullFilePath => Path.Combine(DirectoryPath, FileName);
 
