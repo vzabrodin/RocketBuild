@@ -10,14 +10,14 @@
   <ItemGroup>
     <PackageReference Include="MaterialDesignColors" Version="1.2.6" />
     <PackageReference Include="MaterialDesignThemes" Version="3.1.3" />
-    <PackageReference Include="CommonServiceLocator" Version="2.0.5" />
-    <PackageReference Include="DevExpressMvvm" Version="19.2.3" />
-    <PackageReference Include="Dragablz" Version="0.0.3.203" />
+    <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
+    <PackageReference Include="DevExpressMvvm" Version="20.2.3" />
+    <PackageReference Include="Dragablz" Version="0.0.3.223" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.153.0" />
     <PackageReference Include="Microsoft.VisualStudio.Services.Release.Client" Version="16.153.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.0" />
-    <PackageReference Include="NLog" Version="4.7.2" />
-    <PackageReference Include="NLog.Windows.Forms" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.1" />
+    <PackageReference Include="NLog" Version="4.7.9" />
+    <PackageReference Include="NLog.Windows.Forms" Version="4.5.0-rc.1" />
   </ItemGroup>
 
   <ItemGroup>
